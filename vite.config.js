@@ -8,4 +8,5 @@ export default defineConfig({
     // 出力先を 'docs' に変更
     outDir: 'docs', 
   },
+  base: "/portfolio/", 
 })
