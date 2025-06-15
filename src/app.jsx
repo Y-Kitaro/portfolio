@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
+// 開発用 ダミーデータを利用するようになる
+const DEBUG = false;
+
 // --- ダミーデータ ---
 // 実際にはGASから取得したデータを使用します
 const dummyMainData = {
@@ -72,41 +75,38 @@ function App() {
     
     // データを取得する処理
     useEffect(() => {
-        // --- ここからがデータ取得処理です ---
-        // 実際には、以下のURLを書き換えてください
+        // Google App ScriptのAPIURLを設定
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbzCYqnvwJzjOP7L0vhh3OpM9-IIPzh7kE3yhRSUanvjV0PxYxtTrfAN0qEGkmduT0EG/exec'
         const GAS_URL_MAIN = GAS_URL + '?type=main';
         const GAS_URL_CARDS = GAS_URL + '?type=cards';
         
-        // 【シミュレーション】ダミーデータをセット
-        // 実際の環境では、以下の2行をコメントアウトしてください
-        setMainContent(dummyMainData.main.main);
-        setCardItems(dummyCardsData);
+        if(DEBUG){
+            // 開発デバッグ用のダミーデータ取得処理
+            setMainContent(dummyMainData.main.main);
+            setCardItems(dummyCardsData);
+        } else {
+            // 本番用 メインコンテンツの取得
+            fetch(GAS_URL_MAIN)
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data)
+                    if (data.main) {
+                        setMainContent(data.main.main);
+                    }
+                })
+                .catch(error => console.error('Error fetching main content:', error));
 
-        /*
-        // 【本番用】メインコンテンツの取得
-        fetch(GAS_URL_MAIN)
-            .then(res => res.json())
-            .then(data => {
-                console.log(data)
-                if (data.main) {
-                    setMainContent(data.main.main);
-                }
-            })
-            .catch(error => console.error('Error fetching main content:', error));
-
-        // 【本番用】カードコンテンツの取得
-        fetch(GAS_URL_CARDS)
-            .then(res => res.json())
-            .then(data => {
-                console.log(data);
-                if (data.items) {
-                    setCardItems(data.items);
-                }
-            })
-            .catch(error => console.error('Error fetching card items:', error));
-        */
-        // --- データ取得処理はここまで ---
+            // 本番用 カードコンテンツの取得
+            fetch(GAS_URL_CARDS)
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data);
+                    if (data.items) {
+                        setCardItems(data.items);
+                    }
+                })
+                .catch(error => console.error('Error fetching card items:', error));
+        }
     }, []);
 
     const handleCardClick = (item) => {
